@@ -6,20 +6,23 @@ const csv = require('csv-parser');
 const app = express();
 const PORT = process.env.PORT || 3000; // Use dynamic port for deployment
 
-// ✅ Configure CORS to allow only requests from your GitHub Pages
-const allowedOrigins = ["https://voteforme-md.github.io/voteformeMD-KCSxNUCATS/"];
-app.use(cors({
+// ✅ Configure CORS to allow requests only from GitHub Pages
+const allowedOrigins = ["https://voteforme-md.github.io"];
+
+const corsOptions = {
     origin: function (origin, callback) {
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
+            console.log(`❌ Blocked by CORS: ${origin}`);
             callback(new Error("CORS policy does not allow access from this origin"));
         }
     },
-    methods: "GET, POST",
+    methods: ["GET", "POST"],
     credentials: true
-}));
+};
 
+app.use(cors(corsOptions));
 app.use(express.json());
 
 let taxRates = {};
@@ -150,4 +153,3 @@ app.use((req, res) => {
 
 // ✅ Start Server
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-
