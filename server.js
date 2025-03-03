@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3000; // Use dynamic port for deployment
 
 // ✅ Configure CORS to allow only requests from your GitHub Pages
-const allowedOrigins = ["https://tsbujacncl.github.io"];
+const allowedOrigins = ["https://voteforme-md.github.io/voteformeMD-KCSxNUCATS/"];
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin || allowedOrigins.includes(origin)) {
