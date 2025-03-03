@@ -4,9 +4,22 @@ const fs = require('fs');
 const csv = require('csv-parser');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000; // Use dynamic port for deployment
 
-app.use(cors());
+// ✅ Configure CORS to allow only requests from your GitHub Pages
+const allowedOrigins = ["https://tsbujacncl.github.io"];
+app.use(cors({
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("CORS policy does not allow access from this origin"));
+        }
+    },
+    methods: "GET, POST",
+    credentials: true
+}));
+
 app.use(express.json());
 
 let taxRates = {};
@@ -15,7 +28,7 @@ let taxRates = {};
 const stateAbbreviations = {
     "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR", "California": "CA",
     "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE", "Florida": "FL", "Georgia": "GA",
-    "Hawaii": "HI", "Idaho": "ID", "Illinois": "IL", "Indiana": "IN", "Iowa": "IA",
+    "Hawaii": "HI", "Idaho": "IL", "Illinois": "IL", "Indiana": "IN", "Iowa": "IA",
     "Kansas": "KS", "Kentucky": "KY", "Louisiana": "LA", "Maine": "ME", "Maryland": "MD",
     "Massachusetts": "MA", "Michigan": "MI", "Minnesota": "MN", "Mississippi": "MS",
     "Missouri": "MO", "Montana": "MT", "Nebraska": "NE", "Nevada": "NV", "New Hampshire": "NH",
@@ -31,7 +44,7 @@ function getStateAbbreviation(state) {
     return stateAbbreviations[state] || state;
 }
 
-// Load tax rates
+// ✅ Load tax rates from CSV
 fs.createReadStream('./data/tax_rates.csv')
   .pipe(csv())
   .on('data', (row) => {
@@ -48,7 +61,7 @@ fs.createReadStream('./data/tax_rates.csv')
   })
   .on('end', () => console.log("✅ Tax rates loaded successfully."));
 
-// API to calculate tax with detailed breakdown
+// ✅ API to calculate tax
 app.post('/calculate-tax', (req, res) => {
     let { products, sellerZip, sellerState, buyerZip, buyerState, deliveryMethod, taxRuleType, isTaxExempt, taxOverrideGroup } = req.body;
 
@@ -130,5 +143,11 @@ app.post('/calculate-tax', (req, res) => {
     });
 });
 
-// Start Server
-app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+// ✅ Handle 404 for unknown routes
+app.use((req, res) => {
+    res.status(404).json({ error: "Route not found" });
+});
+
+// ✅ Start Server
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
